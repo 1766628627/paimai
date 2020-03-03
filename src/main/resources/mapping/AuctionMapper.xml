@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.accp.paimai.dao.AuctionMapper">
+	<select id="queryAll" resultType="com.accp.paimai.pojo.Auction">
+		select * from auction
+	</select>
+	<resultMap type="com.accp.paimai.vo.AuctionVo" id="query">
+		<association property="auction" column="auctionid"
+			select="select" />
+		<collection property="list" column="auctionid"
+			select="selectdetail" />
+	</resultMap>
+	<select id="query" resultMap="query">
+		select * from auction where
+		auctionId=#{id}
+	</select>
+	<select id="select" resultType="com.accp.paimai.pojo.Auction">
+		select * from auction where auctionId=#{id}
+	</select>
+	<select id="selectdetail"
+		resultType="com.accp.paimai.vo.AuctionRecordVo">
+		SELECT
+		a.`id`,a.`auctionId`,a.`auctionTime`,a.`auctionPrice`,b.`userName`
+		FROM `auctionrecord` a JOIN`auctionuser` b
+		ON a.`userId`=b.`userId`
+		where auctionId=#{id}
+	</select>
+
+	<select id="queryend" resultType="com.accp.paimai.vo.AuctionsVo">
+	SELECT * ,(SELECT `auctionPrice` FROM `auctionrecord` WHERE
+	`auctionId`=c.`auctionId` ORDER BY auctionPrice DESC LIMIT 0,1) AS
+	price ,
+	(SELECT b.`userName` FROM `auctionrecord` a JOIN`auctionuser` b
+	ON a.`userId`=b.`userId` WHERE `auctionId`=c.`auctionId`ORDER BY
+	auctionPrice DESC LIMIT 0,1) AS `name`
+	FROM `auction` c
+	WHERE `auctionEndTime`>CURDATE()
+	</select>
+
+</mapper>
